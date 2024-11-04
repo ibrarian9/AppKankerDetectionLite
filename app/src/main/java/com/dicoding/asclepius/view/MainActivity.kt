@@ -14,6 +14,7 @@ import com.dicoding.asclepius.helper.ImageClassifierHelper
 import com.dicoding.asclepius.view.history.HistoryActivity
 import com.dicoding.asclepius.view.news.NewsActivity
 import com.yalantis.ucrop.UCrop
+import org.tensorflow.lite.support.label.Category
 import org.tensorflow.lite.task.vision.classifier.Classifications
 import java.io.File
 import java.io.IOException
@@ -112,15 +113,14 @@ class MainActivity : AppCompatActivity() {
                     runOnUiThread {
                         result?.let { it ->
                             if (it.isNotEmpty() && it[0].categories.isNotEmpty()) {
-                                println(it)
-                                val sortedCategories =
-                                    it[0].categories.sortedByDescending { it?.score }
+                                val topCategory =
+                                    it[0].categories.maxByOrNull { category: Category? -> category?.score ?: 0.0f }
                                 val displayResult =
-                                    sortedCategories.joinToString("\n") {
+                                    topCategory?.let {
                                         "${it.label} " + NumberFormat.getPercentInstance()
                                             .format(it.score).trim()
                                     }
-                                moveToResult(displayResult, inferenceTime, uri)
+                                moveToResult(displayResult!!, inferenceTime, uri)
                             } else {
                                 moveToResult("", inferenceTime = 0, uri)
                             }
